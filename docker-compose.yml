@@ -18,7 +18,7 @@ services:
       - laravel_network
 
   mysql:
-    image: mysql:8.0
+    image: mysql:5.7
     container_name: mysql-vivify
     restart: always
     environment:

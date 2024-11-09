@@ -1,5 +1,11 @@
 FROM php:8.2-fpm
 
+COPY composer.lock composer.json /var/www/app/
+
+
+# Set the working directory
+WORKDIR /var/www/app
+
 # Install common php extension dependencies
 RUN apt-get update && apt-get install -y \
     libfreetype-dev \
@@ -12,8 +18,6 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install -j$(nproc) gd \
     && docker-php-ext-install zip
 
-# Set the working directory
-WORKDIR /var/www/app
 
 # Copy project files
 COPY . .

@@ -1,36 +1,29 @@
+# Use the official PHP 8.2 FPM image
 FROM php:8.2-fpm
-
-COPY composer.lock composer.json /var/www/app/
-
-
-# Set the working directory
-WORKDIR /var/www/app
-
-# Install common php extension dependencies
-RUN apt-get update && apt-get install -y \
-    libfreetype-dev \
-    libjpeg62-turbo-dev \
-    libpng-dev \
-    zlib1g-dev \
-    libzip-dev \
-    unzip \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd \
-    && docker-php-ext-install zip
-
-
-# Copy project files
-COPY . .
-
-# Set permissions for the app
-RUN chown -R www-data:www-data /var/www/app \
-    && chmod -R 775 /var/www/app/storage
-
-# Install Composer
-COPY --from=composer:2.6.5 /usr/bin/composer /usr/local/bin/composer
+USER root
+# Set working directory
+WORKDIR /var/www/html
 
 # Install dependencies
-RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+RUN apt-get update && \
+    apt-get install -y \
+    libzip-dev \
+    zip \
+    unzip \
+    && docker-php-ext-install pdo_mysql zip
 
-# Set the default command to run php-fpm
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Copy existing application directory contents
+COPY . .
+
+# Install Composer dependencies
+RUN composer install
+
+# Set permissions for Laravel storage and bootstrap directories
+RUN chown -R www-data:www-data /var/www/html && chmod -R 755 /var/www/html/storage
+
+# Expose port 9000 and start php-fpm server
+EXPOSE 9000
 CMD ["php-fpm"]

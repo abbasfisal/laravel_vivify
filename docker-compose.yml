@@ -1,69 +1,63 @@
 version: '3.8'
-
 services:
   app:
     build:
-      context: ./
+      context: .
       dockerfile: Dockerfile
-    image: app
-    container_name: app-vivify
+    container_name: app
     restart: unless-stopped
-    working_dir: /var/www/
+    tty: true
+    environment:
+      SERVICE_NAME: app
+      SERVICE_TAGS: dev
+    working_dir: /var/www
     volumes:
       - ./:/var/www
-    depends_on:
-      - mysql
-      - redis
     networks:
-      - laravel_network
+      - app-network
 
-  mysql:
-    image: mysql:5.7
-    container_name: mysql-vivify
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: vivify
-      MYSQL_DATABASE: vivify_db
-      MYSQL_USER: vivify_user
-      MYSQL_PASSWORD: vivify_password
-    ports:
-      - "3306:3306"
-    volumes:
-      - mysql_data:/var/lib/mysql
-    networks:
-      - laravel_network
-
-  redis:
-    image: redis:alpine
-    container_name: redis-vivify
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - laravel_network
-
-  nginx:
+  #Nginx
+  webserver:
     image: nginx:1.27
-    container_name: nginx-vivify
-    restart: always
+    container_name: webserver
+    restart: unless-stopped
+    tty: true
     ports:
-      - "80:80"
+      - "8989:80"
       - "443:443"
     volumes:
+      - ./:/var/www
       - ./nginx.conf:/etc/nginx/nginx.conf
       - /etc/letsencrypt:/etc/letsencrypt  # ارجاع به گواهی‌ها
-      - ./:/var/www
-    depends_on:
-      - app
     networks:
-      - laravel_network
+      - app-network
 
+  #MySQL
+  db:
+    image: mysql:5.7.22
+    container_name: db
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: laravel
+      MYSQL_ROOT_PASSWORD: password
+      SERVICE_TAGS: dev
+      SERVICE_NAME: mysql
+    volumes:
+      - dbdata:/var/lib/mysql/
+    networks:
+      - app-network
+
+#Networks
 networks:
-  laravel_network:
+  app-network:
     driver: bridge
-
+#Volumes
 volumes:
-  mysql_data:
-  redis_data:
+  dbdata:
+    driver: local
+
+#
+#

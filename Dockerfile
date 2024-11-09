@@ -1,70 +1,32 @@
-FROM php:8.1-fpm
 
-# Copy composer.lock and composer.json
-COPY composer.lock composer.json /var/www/
+FROM php:8.2-fpm
 
-# Set working directory
-WORKDIR /var/www
-
-# Install dependencies
+# Install common php extension dependencies
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    libpng-dev \
+    libfreetype-dev \
     libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    locales \
-    zip \
-    jpegoptim optipng pngquant gifsicle \
-    vim \
-    unzip \
-    git \
-    curl \
-    libonig-dev \
+    libpng-dev \
+    zlib1g-dev \
     libzip-dev \
-    libgd-dev
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
-#Mine
+    unzip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd \
+    && docker-php-ext-install zip
 
-# Install extensions
-RUN docker-php-ext-install pdo_mysql mbstring zip exif pcntl
-RUN docker-php-ext-configure gd --with-external-gd
-RUN docker-php-ext-install gd
+# Set the working directory
+COPY . /var/www/app
+WORKDIR /var/www/app
 
-# Install composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN chown -R www-data:www-data /var/www/app \
+    && chmod -R 775 /var/www/app/storage
 
-# Add user for laravel application
-RUN groupadd -g 1000 www
-RUN useradd -u 1000 -ms /bin/bash -g www www
 
-# Copy existing application directory contents
-COPY . /var/www
+# install composer
+COPY --from=composer:2.6.5 /usr/bin/composer /usr/local/bin/composer
 
-# Copy existing application directory permissions
-COPY --chown=www:www . /var/www
+# copy composer.json to workdir & install dependencies
+COPY composer.json ./
+RUN composer install
 
-# Change current user to www
-USER www
-
-# Expose port 9000 and start php-fpm server
-EXPOSE 9000
+# Set the default command to run php-fpm
 CMD ["php-fpm"]
-#FROM php:8.2-fpm-alpine
-#
-#RUN apk update && apk add \
-#    curl \
-#    libpng-dev \
-#    libxml2-dev \
-#    zip \
-#    unzip \
-#    shadow  # Add shadow package to install useradd
-#
-#RUN docker-php-ext-install pdo pdo_mysql \
-#    && apk --no-cache add nodejs npm
-#
-#COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
-#
-#WORKDIR /var/www
-#
-#CMD ["php-fpm"]

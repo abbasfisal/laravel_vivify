@@ -1,4 +1,3 @@
-
 FROM php:8.2-fpm
 
 # Install common php extension dependencies
@@ -14,19 +13,20 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install zip
 
 # Set the working directory
-COPY . /var/www/app
 WORKDIR /var/www/app
 
+# Copy project files
+COPY . .
+
+# Set permissions for the app
 RUN chown -R www-data:www-data /var/www/app \
     && chmod -R 775 /var/www/app/storage
 
-
-# install composer
+# Install Composer
 COPY --from=composer:2.6.5 /usr/bin/composer /usr/local/bin/composer
 
-# copy composer.json to workdir & install dependencies
-COPY composer.json ./
-RUN composer install
+# Install dependencies
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
 # Set the default command to run php-fpm
 CMD ["php-fpm"]

@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # PHP Service
   php:
     container_name: php
     build:
@@ -25,6 +24,20 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt  # ارجاع به گواهی‌ها
     depends_on:
       - php
+    networks:
+      - laravel_network
+
+  mysql:
+    image: mysql:5.7
+    container_name: mysql_prod
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: prod_password
+      MYSQL_DATABASE: production_db
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
     networks:
       - laravel_network
 

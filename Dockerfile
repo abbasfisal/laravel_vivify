@@ -1,6 +1,7 @@
 # Use the official PHP 8.2 FPM image
 FROM php:8.2-fpm
 USER root
+
 # Set working directory
 WORKDIR /var/www/html
 
@@ -10,10 +11,15 @@ RUN apt-get update && \
     libzip-dev \
     zip \
     unzip \
+    curl \
     && docker-php-ext-install pdo_mysql zip
 
 # Install Composer
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
+    if [ ! -f /usr/local/bin/composer ]; then \
+        echo "Composer installation failed!"; \
+        exit 1; \
+    fi
 
 # Copy existing application directory contents
 COPY . .

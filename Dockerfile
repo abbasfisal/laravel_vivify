@@ -27,7 +27,7 @@ COPY . .
 
 ENV COMPOSER_HOME=/var/www/.composer
 # Install Composer dependencies
-RUN composer install
+#RUN composer install
 
 # Copy entrypoint script and set permissions
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh

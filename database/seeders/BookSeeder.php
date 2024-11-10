@@ -12,6 +12,6 @@ class BookSeeder extends Seeder
      */
     public function run(): void
     {
-        Book::query()->create(['tilt' => 'book title ' . rand(1111, 9999)]);
+        Book::query()->create(['title' => 'book title ' . rand(1111, 9999)]);
     }
 }

@@ -24,6 +24,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Copy existing application directory contents
 COPY . .
 
+
+ENV COMPOSER_HOME=/var/www/.composer
 # Install Composer dependencies
 RUN composer install
 

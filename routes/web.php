@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Book;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,4 +17,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Route::get('/books', function () {
+    Artisan::call('db:seed', ['--class' => 'BookSeeder']);
+    return Book::all();
 });

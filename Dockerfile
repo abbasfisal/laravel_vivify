@@ -21,9 +21,12 @@ COPY . .
 # Install Composer dependencies
 RUN composer install
 
-# Set permissions for Laravel storage and bootstrap directories
-RUN chown -R www-data:www-data /var/www/html && \
-    chmod -R 775 /var/www/html/storage /var/www/html/bootstrap/cache
+# Copy entrypoint script and set permissions
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+# Set the entrypoint script
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 
 # Expose port 9000 and start php-fpm server

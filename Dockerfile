@@ -15,11 +15,11 @@ RUN apt-get update && \
     && docker-php-ext-install pdo_mysql zip
 
 # Install Composer
-#RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
-#    if [ ! -f /usr/local/bin/composer ]; then \
-#        echo "Composer installation failed!"; \
-#        exit 1; \
-#    fi
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
+    if [ ! -f /usr/local/bin/composer ]; then \
+        echo "Composer installation failed!"; \
+        exit 1; \
+    fi
 
 # Copy existing application directory contents
 #COPY . .
